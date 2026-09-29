@@ -8,7 +8,7 @@ window.FIREBASE_CONFIG = {
     projectId: "encuesta-psicologia-ucsur",
     storageBucket: "encuesta-psicologia-ucsur.firebasestorage.app",
     messagingSenderId: "806161078555",
-    appId: "1:806161078555:web:49dadf2b6316f7d4f9dbbe"
+    appId: "1:806161078555:web:8c6c683983eed712f9dbbe"
 };
 
 window.COLLECTION_NAME = "respuestas_inteligencia_emocional";
