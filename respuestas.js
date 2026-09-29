@@ -5,21 +5,21 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     const QUESTIONS_LABELS = [
-        "P1: Me doy cuenta de lo que siento",
-        "P2: Presto atención a mis emociones",
-        "P3: Fácil identificar emoción",
-        "P4: Noto cambios de ánimo",
-        "P5: Pienso antes de actuar",
-        "P6: Identifico situación provocadora",
-        "P7: Claridad con tristeza",
+        "P1: Me doy cuenta de lo que siento en todo momento",
+        "P2: Presto atención a mis emociones, aunque esté ocupado...",
+        "P3: Fácil identificar qué emoción siento",
+        "P4: Noto cambios de ánimo a lo largo del día",
+        "P5: Pienso en cómo me siento antes de actuar",
+        "P6: Identifico emoción y situación que la provoca",
+        "P7: Claridad cuando siento tristeza",
         "P8: Pensamientos afectan lo que siento",
-        "P9: Explicar con palabras",
-        "P10: Situación provocó estado de ánimo",
-        "P11: Recupero buen humor",
+        "P9: Explicar con palabras lo que siento",
+        "P10: Situación provocó mi estado de ánimo",
+        "P11: Encuentro forma de sentirme mejor",
         "P12: Control bajo presión académica",
         "P13: Me calmo antes de reaccionar",
-        "P14: Actitud positiva ante problemas",
-        "P15: Manejo estrés sin desborde"
+        "P14: Actitud positiva a pesar de problemas",
+        "P15: Manejo estrés sin que me desborde"
     ];
 
     let allResponses = [];
@@ -40,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('searchInput');
     const filterGenero = document.getElementById('filterGenero');
     const btnExportExcel = document.getElementById('btnExportExcel');
-    const btnExportCSV = document.getElementById('btnExportCSV');
     const btnRefresh = document.getElementById('btnRefresh');
     const btnSeedDemoData = document.getElementById('btnSeedDemoData');
     const btnClearLocal = document.getElementById('btnClearLocal');
@@ -51,7 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const fbConfig = window.FIREBASE_CONFIG || {};
     const collectionName = window.COLLECTION_NAME || "respuestas_inteligencia_emocional";
 
-    // Inicializar conexión
+    // Función auxiliar para clasificar nivel de IE
+    function getNivelIE(puntuacion) {
+        if (!puntuacion || isNaN(puntuacion)) return { label: 'Sin datos', class: '' };
+        if (puntuacion >= 55) return { label: 'Alto', class: 'badge-level-alto' };
+        if (puntuacion >= 35) return { label: 'Medio', class: 'badge-level-medio' };
+        return { label: 'Bajo', class: 'badge-level-bajo' };
+    }
+
+    // Inicializar conexión a Firestore o LocalStorage
     function initBackend() {
         try {
             if (typeof firebase !== 'undefined' && fbConfig.apiKey && !fbConfig.apiKey.includes("TU_API_KEY")) {
@@ -186,11 +193,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: 'Puntaje Promedio (1 a 5)',
                     data: questionAverages,
-                    backgroundColor: 'rgba(2, 132, 199, 0.75)',
+                    backgroundColor: 'rgba(2, 132, 199, 0.85)',
                     borderColor: '#0284c7',
                     borderWidth: 1.5,
-                    borderRadius: 6,
-                    hoverBackgroundColor: '#0b4f8a'
+                    borderRadius: 8,
+                    hoverBackgroundColor: '#0a3d62'
                 }]
             },
             options: {
@@ -205,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 return QUESTIONS_LABELS[index];
                             },
                             label: function(context) {
-                                return `Promedio: ${context.raw} / 5.00`;
+                                return `Promedio: ${context.raw} / 5.00 puntos`;
                             }
                         }
                     }
@@ -214,7 +221,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     y: {
                         beginAtZero: true,
                         max: 5,
-                        ticks: { stepSize: 1 }
+                        ticks: { stepSize: 1, font: { weight: '600' } },
+                        grid: { color: 'rgba(226, 232, 240, 0.8)' }
+                    },
+                    x: {
+                        ticks: { font: { weight: '700' } },
+                        grid: { display: false }
                     }
                 }
             }
@@ -240,15 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     data: [f, m],
                     backgroundColor: ['#ec4899', '#0284c7'],
-                    hoverOffset: 4
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' }
-                }
+                    legend: { 
+                        position: 'bottom',
+                        labels: { font: { weight: '700' }, padding: 16 }
+                    }
+                },
+                cutout: '65%'
             }
         });
     }
@@ -275,8 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: 'Estudiantes',
                     data: data.length ? data : [0],
-                    backgroundColor: '#10b981',
-                    borderRadius: 4
+                    backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                    borderColor: '#10b981',
+                    borderWidth: 1.5,
+                    borderRadius: 6
                 }]
             },
             options: {
@@ -286,7 +306,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     legend: { display: false }
                 },
                 scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0 } }
+                    y: { 
+                        beginAtZero: true, 
+                        ticks: { precision: 0, font: { weight: '600' } },
+                        grid: { color: 'rgba(226, 232, 240, 0.8)' }
+                    },
+                    x: {
+                        ticks: { font: { weight: '600' } },
+                        grid: { display: false }
+                    }
                 }
             }
         });
@@ -315,8 +343,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (filtered.length === 0) {
             tableBody.innerHTML = `
                 <tr>
-                    <td colspan="22" style="text-align: center; padding: 2.5rem; color: var(--text-muted);">
-                        <i class="fa-solid fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block;"></i>
+                    <td colspan="23" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        <i class="fa-solid fa-inbox" style="font-size: 2.2rem; margin-bottom: 0.65rem; color: #cbd5e1; display: block;"></i>
                         No se encontraron respuestas registradas aún.
                     </td>
                 </tr>
@@ -332,19 +360,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? '<span class="badge-tag badge-f">F</span>' 
                 : '<span class="badge-tag badge-m">M</span>';
 
+            const nivel = getNivelIE(r.puntuacionTotal);
+
             let pCols = '';
             for (let i = 1; i <= 15; i++) {
                 const val = r.respuestas && r.respuestas[`p${i}`] ? r.respuestas[`p${i}`].valor : '-';
-                pCols += `<td style="text-align: center; font-weight: 600;">${val}</td>`;
+                pCols += `<td style="text-align: center; font-weight: 700; color: var(--primary);">${val}</td>`;
             }
 
             tr.innerHTML = `
                 <td><strong>${idx + 1}</strong></td>
-                <td>${fecha}</td>
-                <td>${r.demograficos?.edad || '-'}</td>
+                <td style="color: var(--text-muted); font-size: 0.82rem;">${fecha}</td>
+                <td><strong>${r.demograficos?.edad || '-'}</strong></td>
                 <td>${generoBadge} ${r.demograficos?.genero || '-'}</td>
                 <td><strong>${r.demograficos?.ciclo || '-'}</strong></td>
                 <td><span class="badge-tag badge-score">${r.puntuacionTotal || '-'} pts</span></td>
+                <td><span class="badge-tag ${nivel.class}">${nivel.label}</span></td>
                 <td><strong>${r.promedioGeneral || '-'}</strong></td>
                 ${pCols}
             `;
@@ -353,84 +384,141 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Exportar a Excel (.xlsx) con SheetJS
+    // 4. Exportar a Excel (.xlsx) Profesional y Formateado para Tesis/SPSS
     function exportToExcel() {
         if (allResponses.length === 0) {
-            alert("No hay respuestas para exportar.");
+            alert("No hay respuestas para exportar. Envía al menos una encuesta primero.");
             return;
         }
 
         if (typeof XLSX === 'undefined') {
-            alert("Librería de Excel cargando. Por favor, reintenta en un momento.");
+            alert("Cargando la librería de Excel. Por favor, reintenta en un momento.");
             return;
         }
 
-        const rows = allResponses.map((r, i) => {
+        const workbook = XLSX.utils.book_new();
+
+        // -------------------------------------------------------------
+        // HOJA 1: MATRIZ NUMÉRICA (Ideal para importar en SPSS, JASP o R)
+        // -------------------------------------------------------------
+        const spssMatrix = allResponses.map((r, i) => {
+            const nivel = getNivelIE(r.puntuacionTotal);
             const row = {
-                "Nro": i + 1,
-                "Fecha Registro": r.fechaEnvio || new Date().toISOString(),
-                "Consentimiento": r.consentimiento || "Acepto participar",
-                "Edad": r.demograficos?.edad || "",
-                "Género": r.demograficos?.genero || "",
-                "Ciclo Académico": r.demograficos?.ciclo || "",
-                "Puntaje Total (15-75)": r.puntuacionTotal || 0,
-                "Media General (1-5)": r.promedioGeneral || 0
+                "ID": i + 1,
+                "FECHA_REGISTRO": r.fechaEnvio || new Date().toISOString(),
+                "EDAD": Number(r.demograficos?.edad) || "",
+                "GENERO": r.demograficos?.genero || "",
+                "GENERO_NUM": r.demograficos?.genero === "Femenino" ? 1 : (r.demograficos?.genero === "Masculino" ? 2 : ""),
+                "CICLO": r.demograficos?.ciclo || "",
+                "PUNTAJE_TOTAL_IE": Number(r.puntuacionTotal) || 0,
+                "NIVEL_IE": nivel.label,
+                "PROMEDIO_IE": Number(r.promedioGeneral) || 0
             };
 
+            // P1 a P15 como valores numéricos puros (1-5)
             for (let q = 1; q <= 15; q++) {
                 const item = r.respuestas ? r.respuestas[`p${q}`] : null;
-                row[`P${q}_Valor`] = item ? item.valor : "";
-                row[`P${q}_Respuesta`] = item ? item.textoOpcion : "";
+                row[`P${q}`] = item ? Number(item.valor) : "";
             }
 
             return row;
         });
 
-        const worksheet = XLSX.utils.json_to_sheet(rows);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Respuestas_UCSUR");
+        const sheet1 = XLSX.utils.json_to_sheet(spssMatrix);
 
-        const filename = `Encuesta_Inteligencia_Emocional_UCSUR_${new Date().toISOString().slice(0,10)}.xlsx`;
+        // Anchos de columna automáticos para que se vea impecable
+        sheet1['!cols'] = [
+            { wch: 6 },  // ID
+            { wch: 22 }, // FECHA
+            { wch: 8 },  // EDAD
+            { wch: 12 }, // GENERO
+            { wch: 13 }, // GENERO_NUM
+            { wch: 14 }, // CICLO
+            { wch: 18 }, // TOTAL
+            { wch: 12 }, // NIVEL
+            { wch: 14 }, // PROMEDIO
+            ...Array(15).fill({ wch: 6 }) // P1 a P15
+        ];
+
+        XLSX.utils.book_append_sheet(workbook, sheet1, "Matriz Numérica (SPSS)");
+
+        // -------------------------------------------------------------
+        // HOJA 2: RESPUESTAS DESCRIPTIVAS COMPLETAS (Texto legible)
+        // -------------------------------------------------------------
+        const descriptiveRows = allResponses.map((r, i) => {
+            const nivel = getNivelIE(r.puntuacionTotal);
+            const row = {
+                "N°": i + 1,
+                "Fecha y Hora": r.fechaEnvio ? new Date(r.fechaEnvio).toLocaleString('es-PE') : "",
+                "Edad (Años)": r.demograficos?.edad || "",
+                "Género": r.demograficos?.genero || "",
+                "Ciclo": r.demograficos?.ciclo || "",
+                "Puntaje Total (15-75)": r.puntuacionTotal || 0,
+                "Nivel de Inteligencia Emocional": nivel.label,
+                "Media (1-5)": r.promedioGeneral || 0
+            };
+
+            for (let q = 1; q <= 15; q++) {
+                const item = r.respuestas ? r.respuestas[`p${q}`] : null;
+                row[`Ítem ${q}: ${QUESTIONS_LABELS[q - 1] || ''}`] = item ? `${item.valor} - ${item.textoOpcion}` : "";
+            }
+
+            return row;
+        });
+
+        const sheet2 = XLSX.utils.json_to_sheet(descriptiveRows);
+        sheet2['!cols'] = [
+            { wch: 6 },
+            { wch: 20 },
+            { wch: 12 },
+            { wch: 12 },
+            { wch: 14 },
+            { wch: 22 },
+            { wch: 28 },
+            { wch: 14 },
+            ...Array(15).fill({ wch: 42 })
+        ];
+
+        XLSX.utils.book_append_sheet(workbook, sheet2, "Respuestas Detalladas");
+
+        // -------------------------------------------------------------
+        // HOJA 3: RESUMEN Y PROMEDIOS POR ÍTEM
+        // -------------------------------------------------------------
+        const summaryData = [
+            { "MÉTRICA": "Total de Participantes", "VALOR": allResponses.length },
+            { "MÉTRICA": "Puntuación Media General", "VALOR": (allResponses.reduce((a, b) => a + (b.puntuacionTotal || 0), 0) / (allResponses.length || 1)).toFixed(2) },
+            { "MÉTRICA": "Puntuación Mínima Registrada", "VALOR": Math.min(...allResponses.map(r => r.puntuacionTotal || 75)) },
+            { "MÉTRICA": "Puntuación Máxima Registrada", "VALOR": Math.max(...allResponses.map(r => r.puntuacionTotal || 15)) },
+            { "MÉTRICA": "", "VALOR": "" },
+            { "MÉTRICA": "PROMEDIO POR CADA ÍTEM (ESCALA 1 A 5)", "VALOR": "" }
+        ];
+
+        for (let q = 1; q <= 15; q++) {
+            let sum = 0, count = 0;
+            allResponses.forEach(r => {
+                if (r.respuestas && r.respuestas[`p${q}`]) {
+                    sum += Number(r.respuestas[`p${q}`].valor) || 0;
+                    count++;
+                }
+            });
+            const avg = count > 0 ? (sum / count).toFixed(2) : 0;
+            summaryData.push({
+                "MÉTRICA": `Ítem ${q}: ${QUESTIONS_LABELS[q - 1]}`,
+                "VALOR": `${avg} pts`
+            });
+        }
+
+        const sheet3 = XLSX.utils.json_to_sheet(summaryData);
+        sheet3['!cols'] = [{ wch: 55 }, { wch: 20 }];
+        XLSX.utils.book_append_sheet(workbook, sheet3, "Resumen Psicométrico");
+
+        // Descargar archivo Excel formateado
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const filename = `Escala_Inteligencia_Emocional_UCSUR_${dateStr}.xlsx`;
         XLSX.writeFile(workbook, filename);
     }
 
-    // 5. Exportar a CSV
-    function exportToCSV() {
-        if (allResponses.length === 0) {
-            alert("No hay datos para exportar.");
-            return;
-        }
-
-        const headers = ["Nro", "Fecha", "Edad", "Genero", "Ciclo", "PuntajeTotal", "Media", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "P8", "P9", "P10", "P11", "P12", "P13", "P14", "P15"];
-        const csvRows = [headers.join(",")];
-
-        allResponses.forEach((r, idx) => {
-            const rowValues = [
-                idx + 1,
-                `"${r.fechaEnvio || ''}"`,
-                r.demograficos?.edad || '',
-                `"${r.demograficos?.genero || ''}"`,
-                `"${r.demograficos?.ciclo || ''}"`,
-                r.puntuacionTotal || '',
-                r.promedioGeneral || ''
-            ];
-
-            for (let q = 1; q <= 15; q++) {
-                const val = r.respuestas && r.respuestas[`p${q}`] ? r.respuestas[`p${q}`].valor : '';
-                rowValues.push(val);
-            }
-
-            csvRows.push(rowValues.join(","));
-        });
-
-        const blob = new Blob(["\uFEFF" + csvRows.join("\n")], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `Respuestas_Inteligencia_Emocional_${new Date().toISOString().slice(0,10)}.csv`;
-        link.click();
-    }
-
-    // 6. Generar Datos Demo de Prueba
+    // 5. Generar Datos Demo de Prueba
     function seedDemoData() {
         const ciclos = ["II Ciclo", "IV Ciclo", "VI Ciclo", "VIII Ciclo", "X Ciclo"];
         const generos = ["Femenino", "Masculino", "Femenino", "Femenino", "Masculino"];
@@ -443,6 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const val = Math.floor(Math.random() * 5) + 1;
                 total += val;
                 respuestas[`p${q}`] = {
+                    pregunta: QUESTIONS_LABELS[q - 1],
                     valor: val,
                     textoOpcion: ["Nada de acuerdo", "Algo de acuerdo", "Bastante de acuerdo", "Muy de acuerdo", "Totalmente de acuerdo"][val - 1]
                 };
@@ -470,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard();
     }
 
-    // 7. Limpiar Datos Locales
+    // 6. Limpiar Datos Locales
     function clearLocalData() {
         if (confirm("¿Estás seguro de que deseas borrar las respuestas guardadas localmente en este navegador?")) {
             localStorage.removeItem('encuesta_respuestas');
@@ -483,7 +572,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (searchInput) searchInput.addEventListener('input', renderTable);
     if (filterGenero) filterGenero.addEventListener('change', renderTable);
     if (btnExportExcel) btnExportExcel.addEventListener('click', exportToExcel);
-    if (btnExportCSV) btnExportCSV.addEventListener('click', exportToCSV);
     if (btnRefresh) {
         btnRefresh.addEventListener('click', () => {
             if (isFirebaseReady) initBackend();
