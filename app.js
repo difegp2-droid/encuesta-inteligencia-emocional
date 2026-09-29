@@ -228,11 +228,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             // Guardar en Firestore si está conectado
             if (isFirebaseReady && db) {
-                await db.collection(collectionName).add({
+                const docRef = await db.collection(collectionName).add({
                     ...registro,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
-                console.log("✅ Guardado en Firebase Cloud Firestore.");
+                console.log("🔥 Guardado exitoso en Firebase Firestore. ID:", docRef.id);
+                showToast("¡Respuestas guardadas en Firebase en la nube!", "success");
+            } else {
+                console.warn("Firebase no estaba listo. Se guardó copia local.");
             }
 
             // Guardar también siempre localmente para disponibilidad offline
@@ -243,15 +246,14 @@ document.addEventListener('DOMContentLoaded', () => {
             progressWrapper.style.display = 'none';
             screenSuccess.style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            showToast("¡Tus respuestas fueron enviadas correctamente!", "success");
 
         } catch (error) {
-            console.error("Error al enviar a Firebase:", error);
+            console.error("❌ Error al guardar en Firebase:", error);
             saveLocal(registro);
             surveyForm.style.display = 'none';
             progressWrapper.style.display = 'none';
             screenSuccess.style.display = 'block';
-            showToast("Respuestas guardadas localmente.", "success");
+            showToast("Aviso: " + (error.message || "Se guardó en modo local"), "error");
         } finally {
             btnSubmit.disabled = false;
             btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane"></i> Enviar Formulario`;
