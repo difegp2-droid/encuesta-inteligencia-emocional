@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Respuestas - Inteligencia Emocional UCSUR</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js para gráficos estadísticos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS para exportar a Excel XLSX -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+    <!-- Header / Barra de Navegación -->
+    <header class="top-navbar">
+        <div class="brand-badge">
+            <div class="brand-logo">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="brand-text">
+                <h2>Panel de Resultados</h2>
+                <span>Escala de Inteligencia Emocional - UCSUR</span>
+            </div>
+        </div>
+        <div class="nav-actions">
+            <span id="firebaseStatusBadge" class="connection-badge offline">
+                <span class="connection-dot"></span>
+                <span id="firebaseStatusText">Modo Local</span>
+            </span>
+            <a href="index.html" class="nav-link-btn" title="Ir a la encuesta">
+                <i class="fa-solid fa-pen-to-square"></i>
+                <span>Ir al Formulario</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Contenedor del Dashboard -->
+    <main class="dashboard-container">
+        
+        <!-- Tarjetas de Métricas Resumen -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                <span class="stat-label">Total Participantes</span>
+                <span class="stat-value" id="statTotalCount">0</span>
+                <span class="stat-desc">Estudiantes de psicología</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-brain"></i></div>
+                <span class="stat-label">Puntaje Global Medio</span>
+                <span class="stat-value" id="statMeanScore">0.0</span>
+                <span class="stat-desc">Escala de 15 a 75 puntos</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-venus-mars"></i></div>
+                <span class="stat-label">Distribución de Género</span>
+                <span class="stat-value" id="statGenderRatio">-</span>
+                <span class="stat-desc" id="statGenderDetail">0 F / 0 M</span>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <span class="stat-label">Edad Promedio</span>
+                <span class="stat-value" id="statMeanAge">0</span>
+                <span class="stat-desc">Años de edad</span>
+            </div>
+        </div>
+
+        <!-- Fila de Gráficos -->
+        <div class="charts-grid">
+            <!-- Gráfico de Promedios por Pregunta -->
+            <div class="chart-card" style="grid-column: 1 / -1;">
+                <h3>
+                    <span><i class="fa-solid fa-chart-bar" style="color: var(--accent); margin-right: 8px;"></i> Promedio de Puntuación por Ítem (Preguntas 1 a 15)</span>
+                    <span style="font-size: 0.8rem; font-weight: 500; color: var(--text-muted);">Escala de 1 (Nada) a 5 (Totalmente)</span>
+                </h3>
+                <div class="chart-wrapper" style="height: 320px;">
+                    <canvas id="chartQuestions"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de Género -->
+            <div class="chart-card">
+                <h3>
+                    <span><i class="fa-solid fa-pie-chart" style="color: var(--accent); margin-right: 8px;"></i> Participación por Género</span>
+                </h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartGender"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico de Ciclos -->
+            <div class="chart-card">
+                <h3>
+                    <span><i class="fa-solid fa-graduation-cap" style="color: var(--accent); margin-right: 8px;"></i> Distribución por Ciclo</span>
+                </h3>
+                <div class="chart-wrapper">
+                    <canvas id="chartCiclos"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla Detallada de Respuestas -->
+        <div class="table-card">
+            <div class="table-header-bar">
+                <div class="table-title">
+                    <h3><i class="fa-solid fa-table-list" style="color: var(--accent); margin-right: 8px;"></i> Matriz de Datos Recolectados</h3>
+                </div>
+                <div class="table-actions">
+                    <input type="text" id="searchInput" class="filter-input" placeholder="🔍 Buscar por ciclo, género, etc...">
+                    
+                    <select id="filterGenero" class="filter-input">
+                        <option value="ALL">Todos los géneros</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Masculino">Masculino</option>
+                    </select>
+
+                    <button id="btnExportExcel" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" title="Descargar en Excel XLSX para SPSS o análisis">
+                        <i class="fa-solid fa-file-excel" style="color: #10b981;"></i> Exportar a Excel
+                    </button>
+
+                    <button id="btnExportCSV" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" title="Descargar archivo CSV">
+                        <i class="fa-solid fa-file-csv" style="color: #0284c7;"></i> Exportar CSV
+                    </button>
+
+                    <button id="btnRefresh" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">
+                        <i class="fa-solid fa-rotate"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabla responsiva con scroll horizontal -->
+            <div class="table-responsive">
+                <table class="data-table" id="responsesTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Fecha/Hora</th>
+                            <th>Edad</th>
+                            <th>Género</th>
+                            <th>Ciclo</th>
+                            <th>Puntaje Total (15-75)</th>
+                            <th>Media</th>
+                            <!-- 15 Columnas para las preguntas -->
+                            <th title="P1: Me doy cuenta de lo que siento en todo momento">P1</th>
+                            <th title="P2: Presto atención a mis emociones...">P2</th>
+                            <th title="P3: Me resulta fácil identificar qué emoción...">P3</th>
+                            <th title="P4: Noto cuando mi estado de ánimo cambia...">P4</th>
+                            <th title="P5: Me tomo un momento para pensar...">P5</th>
+                            <th title="P6: Puedo identificar que emoción siento...">P6</th>
+                            <th title="P7: Identifico con claridad cuando siento tristeza">P7</th>
+                            <th title="P8: Me doy cuenta de cómo mis pensamientos...">P8</th>
+                            <th title="P9: Puedo explicar con palabras lo que estoy sintiendo">P9</th>
+                            <th title="P10: Identifico con facilidad qué situación provocó...">P10</th>
+                            <th title="P11: Cuando estoy de mal humor, encuentro la forma...">P11</th>
+                            <th title="P12: Puedo controlar mis emociones incluso...">P12</th>
+                            <th title="P13: Cuando algo me molesta, trato de calmarme...">P13</th>
+                            <th title="P14: Mantengo una actitud positiva a pesar...">P14</th>
+                            <th title="P15: En situaciones estresantes, logro manejar...">P15</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Se insertan dinámicamente las filas -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Acciones auxiliares al pie de tabla -->
+            <div style="padding: 1rem 1.5rem; background: #fafbfc; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <span id="tableCountSummary" style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">
+                    Mostrando 0 registros
+                </span>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button id="btnSeedDemoData" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem;" title="Genera respuestas de prueba para ver gráficos">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generar 5 respuestas de prueba
+                    </button>
+                    <button id="btnClearLocal" class="btn btn-secondary" style="padding: 0.4rem 0.85rem; font-size: 0.8rem; color: var(--danger);" title="Limpiar datos locales">
+                        <i class="fa-solid fa-trash-can"></i> Limpiar datos locales
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal o Guía de Configuración Firebase -->
+    <div id="firebaseConfigBanner" style="display:none; max-width: 1200px; margin: 0 auto 2rem auto; padding: 0 1.5rem;">
+        <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: var(--radius-md); padding: 1.25rem 1.5rem; color: #1e40af; font-size: 0.9rem;">
+            <h4 style="font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fa-solid fa-circle-info"></i> ¿Cómo conectar con Firebase Firestore para recolectar respuestas online?
+            </h4>
+            <p style="margin-bottom: 0.5rem;">
+                Actualmente estás visualizando los datos guardados en este navegador. Para recibir respuestas desde cualquier celular o computadora de tus compañeros:
+            </p>
+            <ol style="padding-left: 1.25rem; line-height: 1.6;">
+                <li>Abre el archivo <code>firebase-config.js</code> en este proyecto.</li>
+                <li>Pega las credenciales de tu proyecto de Firebase (creado gratis en <a href="https://console.firebase.google.com/" target="_blank" style="color: #1d4ed8; text-decoration: underline;">console.firebase.google.com</a>).</li>
+                <li>¡Listo! Todas las respuestas se sincronizarán en la nube al instante.</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <!-- Configuración y Lógica del Dashboard -->
+    <script src="firebase-config.js"></script>
+    <script src="respuestas.js"></script>
+</body>
+</html>
