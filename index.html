@@ -10,18 +10,26 @@
 </head>
 <body>
 
+    <!-- Ticker Editorial Superior -->
+    <div class="editorial-ticker">
+        <div class="ticker-content">
+            <span class="ticker-dot"></span>
+            <span>INVESTIGACIÓN ACADÉMICA UCSUR 2026-2 — FACULTAD DE CIENCIAS DE LA SALUD</span>
+        </div>
+        <div style="font-size: 0.7rem; color: #A1A1AA;">PSICOLOGÍA CIENTÍFICA</div>
+    </div>
+
     <!-- Barra de Navegación Superior -->
     <header class="top-navbar">
         <div class="brand-badge">
-            <div class="brand-logo">
-                <i class="fa-solid fa-brain"></i>
-            </div>
-            <div class="brand-text">
-                <h2>UCSUR - Psicología</h2>
-                <span>Investigación Psicométrica 2026-2</span>
+            <span class="brand-logo-circle"></span>
+            <div class="brand-title">
+                Psicología<span>UCSUR</span>
             </div>
         </div>
-        <!-- Solo información de la carrera / universidad sin enlaces a resultados -->
+        <span style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; color: var(--text-muted); letter-spacing: 0.04em;">
+            CUESTIONARIO ANÓNIMO
+        </span>
     </header>
 
     <!-- Contenedor Principal de la Encuesta -->
@@ -30,8 +38,8 @@
         <!-- Barra de Progreso Global -->
         <div class="progress-wrapper" id="progressWrapper">
             <div class="progress-info">
-                <span id="progressText">Progreso del cuestionario</span>
-                <span id="progressPercent">0%</span>
+                <span id="progressText"><i class="fa-solid fa-list-check" style="margin-right: 6px; color: var(--accent-red);"></i> Progreso del Cuestionario</span>
+                <span id="progressPercent" class="progress-pill">0% COMPLETADO</span>
             </div>
             <div class="progress-bar-container">
                 <div class="progress-bar-fill" id="progressBarFill"></div>
@@ -41,8 +49,9 @@
         <form id="surveyForm" novalidate>
             <!-- TARJETA 1: Encabezado y Consentimiento Informado -->
             <section class="survey-card" id="sectionConsent">
+                <div class="eyebrow-tag">Estudio Psicométrico de Escala</div>
                 <h1 class="survey-title">
-                    Inteligencia Emocional en estudiantes de Psicología de la Universidad Científica del Sur
+                    Inteligencia <span class="highlight-teal">Emocional</span> en estudiantes de Psicología de la Universidad Científica del Sur
                 </h1>
                 
                 <p class="survey-subtitle">
