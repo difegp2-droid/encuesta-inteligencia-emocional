@@ -137,9 +137,11 @@ body {
     letter-spacing: -0.01em;
 }
 
-.brand-title span {
-    color: var(--accent-teal);
-    font-style: italic;
+.brand-title span,
+.ucsur-blue {
+    color: #005696 !important; /* Azul Institucional UCSUR */
+    font-weight: 800;
+    font-style: normal;
 }
 
 .nav-pill-btn {
